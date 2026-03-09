@@ -1,0 +1,29 @@
+:root {
+  /* 全局页面背景底色 */
+  --heo-background: #f3ead7;
+
+  /* 卡片底色 */
+  --card-bg: rgba(255, 252, 244, 0.9);
+
+  /* 顶栏的颜色 */
+  --nav-bg: #6b4f3a !important;
+
+  /* 文字的颜色 */
+  --heo-font-color: #3e342b;
+}
+
+/* 覆盖导航栏 */
+#nav {
+  background: var(--nav-bg) !important;
+}
+
+/* 开屏大方块遮罩的颜色 */
+#page-header.full_page:before {
+  background-color: rgba(223, 52, 98, 0.7) !important;
+}
+
+/* 应用全局底色 */
+body {
+  background: var(--heo-background) !important;
+  color: var(--heo-font-color) !important;
+}
