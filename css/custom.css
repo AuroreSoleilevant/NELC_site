@@ -19,7 +19,7 @@
 
 /* 开屏大方块遮罩的颜色 */
 #page-header.full_page:before {
-  background-color: rgba(223, 52, 98, 0.7) !important;
+  background-color: rgba(255, 199, 115, 0.9) !important;
 }
 
 /* 应用全局底色 */
