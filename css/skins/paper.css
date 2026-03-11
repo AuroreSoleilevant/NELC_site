@@ -62,7 +62,7 @@
 }
 
 /* 底栏颜色 */
-:root:not([data-theme="dark"]) #footer {
+#footer {
   background-color: var(--heo-footer-color);
   color: var(--heo-footer-font-color);
 }
@@ -120,7 +120,7 @@
 
 /* 文章卡片按钮 */
 /* 默认状态 */
-:root:not([data-theme="dark"]) .recent-post-item {
+.recent-post-item {
   transition:
     transform 0.25s ease,
     box-shadow 0.25s ease;
@@ -131,14 +131,14 @@
   cursor: pointer; /* 鼠标悬停显示手型 */
 }
 /* 悬停抬起 */
-:root:not([data-theme="dark"]) .recent-post-item:hover {
+.recent-post-item:hover {
   transform: translateY(-10px); /* 抬起距离 */
   box-shadow:
     0 10px 20px rgba(139, 106, 82, 0.15),
     0 6px 6px rgba(139, 106, 82, 0.1);
 }
 /* 按下效果 */
-:root:not([data-theme="dark"]) .recent-post-item:active {
+.recent-post-item:active {
   transform: translateY(8px); /* 下压 */
   box-shadow:
     0 5px 10px rgba(139, 106, 82, 0.1),
