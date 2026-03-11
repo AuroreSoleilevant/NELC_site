@@ -1,7 +1,8 @@
-main {
+body {
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
 }
-main.loaded {
+
+html.loaded body {
   opacity: 1;
 }
