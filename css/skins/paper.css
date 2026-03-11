@@ -1,31 +1,31 @@
-:root {
+:root:not([data-theme="dark"]) {
   /* 全局页面背景底色 */
   --heo-background: #f3ead7;
 
   /* 卡片底色 */
   --card-bg: rgba(255, 252, 244, 0.9);
 
-  /* 顶栏的颜色 */
-  --nav-bg: #6b4f3a !important;
-
   /* 文字的颜色 */
-  --heo-font-color: #3e342b;
+  --heo-font-color: #3e342b7b;
 }
 
-/* 覆盖导航栏 */
-#nav {
-  background: var(--nav-bg) !important;
+/* 覆盖导航栏颜色 */
+:root:not([data-theme="dark"]) header.nav-fixed.nav-visible #nav {
+  background-color: rgba(107, 79, 58, 0.65) !important;
+  backdrop-filter: blur(6px) !important;
 }
 
-/* 开屏大方块遮罩的颜色 */
-/*
-#page-header.full_page:before {
-  background-color: rgba(255, 199, 115, 0.9) !important;
+/* 顶栏文字改为白色 */
+:root:not([data-theme="dark"]) header.nav-fixed.nav-visible #nav .site-page,
+:root:not([data-theme="dark"])
+  header.nav-fixed.nav-visible
+  #nav
+  .nav-site-title {
+  color: #fff !important;
 }
-*/
 
 /* 应用全局底色 */
-body {
-  background: var(--heo-background) !important;
-  color: var(--heo-font-color) !important;
+:root:not([data-theme="dark"]) body {
+  background: var(--heo-background);
+  color: var(--heo-font-color);
 }
