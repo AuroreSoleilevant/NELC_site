@@ -83,7 +83,7 @@
 :root:not([data-theme="dark"])
   a:hover:not(#nav a):not(#card-info-btn):not(.card-archive-list-link):not(
     .page-number
-  ):not(.toc-link):not(.card-category-list-link) {
+  ):not(.toc-link):not(.card-category-list-link):not(.extend.next) {
   color: var(--heo-link-hover-color) !important;
 }
 
