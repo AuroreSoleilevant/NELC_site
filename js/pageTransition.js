@@ -1,5 +1,5 @@
 (() => {
-  const FADE_DURATION = 300;
+  const FADE_DURATION = 400;
 
   function fadeIn() {
     document.documentElement.classList.add("loaded");
