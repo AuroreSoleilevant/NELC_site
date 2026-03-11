@@ -2,30 +2,79 @@
   /* 全局页面背景底色 */
   --heo-background: #f3ead7;
 
-  /* 卡片底色 */
-  --card-bg: rgba(255, 252, 244, 0.9);
+  /* 卡片 */
+  --card-bg: rgba(255, 252, 244, 0.9); /* 背景色 */
 
-  /* 文字的颜色 */
-  --heo-font-color: #3e342b7b;
+  /* 全局普通文字的颜色 */
+  --heo-font-color: #5a4e42;
+
+  /* 顶栏 */
+  --heo-header-color: rgba(107, 79, 58, 0.65); /* 背景色 */
+  --heo-header-font-color: #fdfcf8; /* 文本颜色 */
+
+  /* 底栏 */
+  --heo-footer-color: #8b6a52; /* 背景色 */
+  --heo-footer-font-color: #fdfcf8; /* 文本颜色 */
+
+  /* 滚动条 */
+  --scrollbar-thumb-bg: #8b6a52; /* 滚动条滑块颜色 */
 }
 
-/* 覆盖导航栏颜色 */
-:root:not([data-theme="dark"]) header.nav-fixed.nav-visible #nav {
-  background-color: rgba(107, 79, 58, 0.65) !important;
+/* 顶栏背景色 */
+:root:not([data-theme="dark"]) header.nav-fixed #nav {
+  background-color: var(--heo-header-color) !important;
   backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
 }
+/* 我还是不太建议删掉这些important */
 
-/* 顶栏文字改为白色 */
-:root:not([data-theme="dark"]) header.nav-fixed.nav-visible #nav .site-page,
-:root:not([data-theme="dark"])
-  header.nav-fixed.nav-visible
-  #nav
-  .nav-site-title {
-  color: #fff !important;
+/* 应用顶栏文本颜色 */
+:root:not([data-theme="dark"]) header.nav-fixed #nav a,
+:root:not([data-theme="dark"]) header.nav-fixed #nav span,
+:root:not([data-theme="dark"]) header.nav-fixed #nav i {
+  color: var(--heo-header-font-color) !important;
 }
 
 /* 应用全局底色 */
 :root:not([data-theme="dark"]) body {
   background: var(--heo-background);
   color: var(--heo-font-color);
+}
+
+/* 背景纹理 */
+:root:not([data-theme="dark"]) body {
+  background-color: var(--heo-background);
+  background-image: url("/NELC_site/image/paper.png");
+  background-repeat: repeat;
+}
+
+/* 底栏颜色 */
+:root:not([data-theme="dark"]) #footer {
+  background-color: var(--heo-footer-color);
+  color: var(--heo-footer-font-color);
+}
+
+/* 滚动条颜色 */
+:root:not([data-theme="dark"]) ::-webkit-scrollbar {
+  width: 8px;
+}
+:root:not([data-theme="dark"]) ::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb-bg);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb {
+  border: 2px solid #f3ead7;
+}
+
+/* 默认链接悬停色 */
+:root:not([data-theme="dark"])
+  a:hover:not(#nav a):not(#card-info-btn):not(.card-archive-list-link):not(
+    .page-number
+  ):not(.toc-link) {
+  color: #ed8941 !important;
+}
+
+/* 侧边归档菜单悬停色 */
+:root:not([data-theme="dark"]) .card-archive-list-link:hover {
+  background-color: rgba(176, 120, 83, 0.7) !important;
 }
