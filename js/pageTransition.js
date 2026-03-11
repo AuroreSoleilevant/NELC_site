@@ -1,9 +1,18 @@
 (() => {
-  const FADE_DURATION = 500;
+  const FADE_DURATION = 300;
+
+  function fadeIn() {
+    document.documentElement.classList.add("loaded");
+    document.body.style.opacity = "";
+  }
+
+  window.addEventListener("load", fadeIn);
 
   // 页面加载淡入
-  window.addEventListener("pageshow", () => {
-    document.documentElement.classList.add("loaded");
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted) {
+      fadeIn();
+    }
   });
 
   document.addEventListener(
