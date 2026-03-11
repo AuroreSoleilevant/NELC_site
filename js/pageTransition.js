@@ -22,7 +22,9 @@
       document.body.style.transition = `opacity ${FADE_DURATION}ms`;
       document.body.style.opacity = 0;
 
-      window.location.href = a.href;
+      setTimeout(() => {
+        window.location.href = a.href;
+      }, FADE_DURATION);
     },
     true,
   );
