@@ -1,38 +1,44 @@
-document.addEventListener("DOMContentLoaded", function () {
-  /* ---------- 页面淡入 ---------- */
+(() => {
+  const FADE_CLASS = "loaded";
+  const FADE_DURATION = 500; // 与 CSS 中的 transition 时间一致
 
-  document.body.classList.add("page-loaded");
+  function getMain() {
+    return (
+      document.querySelector("main") || document.querySelector("#content-inner")
+    );
+  }
 
-  /* ---------- 页面淡出 ---------- */
+  // 页面加载时淡入
+  window.addEventListener("pageshow", () => {
+    const main = getMain();
+    if (main) main.classList.add(FADE_CLASS);
+  });
 
-  const links = document.querySelectorAll("a");
+  // 点击拦截
+  document.addEventListener(
+    "click",
+    (e) => {
+      const a = e.target.closest("a");
+      if (!a || !a.href || a.target === "_blank") return;
 
-  links.forEach((link) => {
-    const href = link.getAttribute("href");
+      const url = new URL(a.href);
+      if (url.origin !== location.origin) return; // 仅限站内
 
-    if (!href) return;
-
-    // 排除可能的奇怪情况
-    if (
-      href.startsWith("#") || // 页面锚点
-      href.startsWith("javascript") ||
-      href.startsWith("mailto:") ||
-      href.startsWith("tel:") ||
-      link.target === "_blank" || // 新标签
-      href.includes("giscus") || // 评论系统
-      (href.startsWith("http") && !href.includes(location.hostname)) // 外链
-    )
-      return;
-
-    link.addEventListener("click", function (e) {
       e.preventDefault();
 
-      document.body.classList.remove("page-loaded");
-      document.body.classList.add("page-fade-out");
+      const main = getMain();
+      if (main) {
+        main.style.transition = `opacity ${FADE_DURATION}ms`;
+        main.style.opacity = 0;
 
-      setTimeout(function () {
-        window.location.href = href;
-      }, 350);
-    });
-  });
-});
+        // 等待动画结束后跳转
+        setTimeout(() => {
+          window.location.href = a.href;
+        }, FADE_DURATION);
+      } else {
+        window.location.href = a.href;
+      }
+    },
+    true,
+  );
+})();

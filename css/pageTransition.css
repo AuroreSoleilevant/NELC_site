@@ -1,20 +1,7 @@
-/* 页面初始状态 */
-body {
+main {
   opacity: 0;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.5s ease-in-out;
 }
-
-/* 页面加载完成 */
-body.page-loaded {
+main.loaded {
   opacity: 1;
-}
-
-/* 页面离开 */
-body.page-fade-out {
-  opacity: 0;
-}
-
-/* 防止切换时闪白 */
-html {
-  background: var(--heo-background);
 }
