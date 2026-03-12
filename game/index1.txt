@@ -1,10 +1,19 @@
+---
+title: 小游戏
+layout: false
+date: 2018-01-05 00:00:00
+type: "game"
+---
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>文字雨 · NeuroEcho Literary Game</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css" />
+  <link rel="stylesheet" href="/NELC_site/css/pageTransition.css">
+  <script src="/NELC_site/js/pageTransition.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=ZCOOL+KuaiLe&display=swap');
     /* ── 浅色变量 ── */
@@ -476,43 +485,13 @@
       transform: translateX(-50%) scale(1);
     }
     /* ── 响应式 ── */
-    @media (max-width: 1020px) {
-      /* 顶部按钮：考虑系统状态栏安全区 */
-      .back-link, .theme-toggle {
-        top: max(env(safe-area-inset-top, 0px) + 8px, 44px);
-      }
-      .back-link { left: 12px; padding: 6px 12px; font-size: 0.82rem; }
-      .theme-toggle { right: 12px; width: 36px; height: 36px; font-size: 1rem; }
-      /* HUD 下移，避开顶部按钮 */
-      .game-hud {
-        margin-top: max(env(safe-area-inset-top, 0px) + 52px, 96px);
-        gap: 8px;
-        padding: 8px 10px;
-        font-size: 0.72rem;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      .hud-value { font-size: 0.9rem; min-width: 22px; }
-      /* 游戏区 */
-      .game-canvas { width: 96%; border-radius: 8px; margin: 6px auto 6px; }
-      .overlay-card { padding: 28px 18px; margin: 0 12px; max-width: 92vw; }
-      .game-title { font-size: 1.8rem; }
-      .input-area input {
-        width: 80vw;
-        max-width: 300px;
-        font-size: 1rem;
-        padding: 10px 16px;
-      }
+    @media (max-width: 640px) {
+      .game-hud { gap: 14px; padding: 12px 16px; font-size: 0.8rem; }
+      .game-canvas { width: 96%; border-radius: 10px; }
+      .overlay-card { padding: 32px 24px; margin: 0 16px; }
+      .game-title { font-size: 2rem; }
+      .input-area input { width: 260px; font-size: 1rem; }
       .difficulty-select { flex-wrap: wrap; }
-      /* 移动端不需要鼠标跟随 */
-      .cursor-follower { display: none; }
-    }
-    /* 虚拟键盘弹出时用 dvh 保持布局 */
-    @supports (height: 100dvh) {
-      @media (max-width: 640px) {
-        body { min-height: 100dvh; overflow: hidden; }
-        .game-wrapper { height: 100dvh; }
-      }
     }
     /* 首次进入动画 */
     @keyframes page-fade-in {
@@ -533,12 +512,12 @@
       animation: list-bounce-in 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
 
-<p>  </style></p>
+  </style>
 </head>
 <body>
   <button class="back-link" id="backBtn" onclick="handleBack()">
     <i class="fas fa-arrow-left"></i>
-    <span id="backText">返回</span>
+    <span id="backText">返回主页</span>
   </button>
   <button class="theme-toggle" id="themeToggle" title="切换明暗模式"><i class="fas fa-adjust"></i></button>
 
@@ -612,7 +591,7 @@
       <div class="combo-display" id="comboDisplay"></div>
       <div class="ground-line"></div>
       <div class="input-area">
-        <input type="text" id="gameInput" placeholder="在这里打字……" autocomplete="off" inputmode="text" enterkeyhint="done" />
+        <input type="text" id="gameInput" placeholder="在这里打字……" autocomplete="off" />
       </div>
     </div>
 
@@ -771,11 +750,9 @@
       el.style.top = '-50px';
 
       const speedVariance = 0.85 + Math.random() * 0.3;
-      // 根据实际 canvas 高度等比缩放速度，保证移动端体验一致
-      const heightScale = canvas.clientHeight / 600;
       const word = {
         id: state.wordIdCounter++, text, x, y: -50,
-        speed: state.currentSpeed * speedVariance * heightScale, el
+        speed: state.currentSpeed * speedVariance, el
       };
       state.words.push(word);
     }
@@ -803,9 +780,8 @@
         // 间隔到下限后，加速移动速度
         else if (state.currentSpeed < cfg.maxSpeed) {
           state.currentSpeed = Math.min(state.currentSpeed + cfg.speedIncrement, cfg.maxSpeed);
-          const _hs = canvas.clientHeight / 600;
           state.words.forEach(w => {
-            if (!w.removed) w.speed = state.currentSpeed * (0.85 + Math.random() * 0.3) * _hs;
+            if (!w.removed) w.speed = state.currentSpeed * (0.85 + Math.random() * 0.3);
           });
           didChange = true;
         }
@@ -952,8 +928,8 @@
 
     function handleBack() {
       if (gamePhase === 'list') {
-        // 在列表页，返回上一页
-        history.back();
+        // 在列表页，返回主站
+        window.location.href = '/';
       } else if (gamePhase === 'select') {
         // 在难度选择页，回到列表
         startOverlay.classList.add('hidden');
@@ -989,9 +965,9 @@
       if (gamePhase === 'playing') {
         text.textContent = '退出游戏';
       } else if (gamePhase === 'select') {
-        text.textContent = '返回';
+        text.textContent = '返回列表';
       } else {
-        text.textContent = '返回';
+        text.textContent = '返回主页';
       }
     }
 
@@ -1034,15 +1010,6 @@
     }
 
     canvas.addEventListener('click', () => input.focus());
-
-    // 移动端：键盘弹起后将输入框滚入视野
-    input.addEventListener('focus', () => {
-      if (window.innerWidth <= 640) {
-        setTimeout(() => {
-          input.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }, 300);
-      }
-    });
     renderHealth();
   </script>
   <img class="cursor-follower" id="cursorFollower" src="/image/neuro_stand.png" alt="" />
