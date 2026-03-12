@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
-  <title>文字雨 · NeuroEcho Literary Game</title>
+  <title>文字雨 | NeuroEcho Literary Community</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=ZCOOL+KuaiLe&display=swap');
@@ -632,7 +632,7 @@
       if (localStorage.getItem('game-theme') === 'dark') setTheme(true);
     } catch(e) {}
 
-    // ── 词库 ──
+    // ── 词库-之后补充 ──
     const WORD_POOLS = {
       easy: [
         '月光','星辰','微风','花瓣','黎明','梦境','回忆','温柔',
@@ -741,6 +741,8 @@
       endOverlay.classList.add('hidden');
       input.value = '';
       input.focus();
+      // 游戏启动时快照 canvas 高度，避免虚拟键盘弹出后高度变化影响下落速度
+      state.baseCanvasHeight = Math.max(canvas.clientHeight, 400);
 
       spawnWord();
       state.spawnTimer = setInterval(spawnWord, cfg.interval);
@@ -775,9 +777,8 @@
       el.style.top = '-50px';
 
       const speedVariance = 0.85 + Math.random() * 0.3;
-      // 根据实际 canvas 高度等比缩放速度，保证移动端体验一致
-      // 用 Math.max(h, 300) 防止虚拟键盘压缩后 canvas 过矮导致速度趋近于零
-      const heightScale = Math.max(canvas.clientHeight, 300) / 600;
+      // 使用游戏启动时快照的高度，避免虚拟键盘弹出导致 clientHeight 缩小而减速
+      const heightScale = (state.baseCanvasHeight || Math.max(canvas.clientHeight, 400)) / 600;
       const word = {
         id: state.wordIdCounter++, text, x, y: -50,
         speed: state.currentSpeed * speedVariance * heightScale, el
@@ -790,7 +791,7 @@
       const now = Date.now();
       const elapsed = Math.floor((now - state.startTime) / 1000);
       const cfg = DIFFICULTY[state.difficulty];
-      const groundY = canvas.clientHeight - 80;
+      const groundY = (state.baseCanvasHeight || canvas.clientHeight) - 80;
 
       // 阶段性加速
       const timeSinceLastSpeedUp = (now - state.lastSpeedUpTime) / 1000;
@@ -808,7 +809,7 @@
         // 间隔到下限后，加速移动速度
         else if (state.currentSpeed < cfg.maxSpeed) {
           state.currentSpeed = Math.min(state.currentSpeed + cfg.speedIncrement, cfg.maxSpeed);
-          const _hs = Math.max(canvas.clientHeight, 300) / 600;
+          const _hs = (state.baseCanvasHeight || Math.max(canvas.clientHeight, 400)) / 600;
           state.words.forEach(w => {
             if (!w.removed) w.speed = state.currentSpeed * (0.85 + Math.random() * 0.3) * _hs;
           });
