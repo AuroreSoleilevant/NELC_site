@@ -791,7 +791,7 @@
       const now = Date.now();
       const elapsed = Math.floor((now - state.startTime) / 1000);
       const cfg = DIFFICULTY[state.difficulty];
-      const groundY = (state.baseCanvasHeight || canvas.clientHeight) - 80;
+      const groundY = canvas.clientHeight - 80;
 
       // 阶段性加速
       const timeSinceLastSpeedUp = (now - state.lastSpeedUpTime) / 1000;
