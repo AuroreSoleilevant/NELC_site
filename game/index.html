@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
-  <title>文字雨 | NeuroEcho Literary Community</title>
+  <title>小游戏 | NeuroEcho Literary Community</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.1.0/css/all.min.css" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=ZCOOL+KuaiLe&display=swap');
@@ -632,25 +632,30 @@
       if (localStorage.getItem('game-theme') === 'dark') setTheme(true);
     } catch(e) {}
 
-    // ── 词库-之后补充 ──
+    // ── 词库 ──
     const WORD_POOLS = {
       easy: [
         '月光','星辰','微风','花瓣','黎明','梦境','回忆','温柔',
         '故事','旋律','秘密','时光','雨滴','心跳','笑容','天空',
         '海洋','森林','蝴蝶','烟火','远方','歌声','日落','清晨',
+        '钢管','哲学','牛肉','神经','内存','蜂群','冷鱼','位置',
         'Neuro','Evil','Vedal','yipee','Camila','Anny','Miniko'
       ],
       normal: [
-        '月光','星辰','微风','花瓣','黎明','梦境','回忆','温柔',
-        '故事','旋律','秘密','时光','雨滴','心跳','笑容','天空',
-        '海洋','森林','蝴蝶','烟火','远方','歌声','日落','清晨',
-        'Neuro','Evil','Vedal','yipee','Camila','Anny','Miniko'
+        '星辰','微风','花瓣','黎明','梦境','回忆','温柔','旋律',
+        '钢管','哲学','牛肉','神经','内存','蜂群','冷鱼','位置',
+        'Neuro','Evil','Vedal','yipee','Camila','Anny','Miniko',
+        'heart','Alex','Ellie','Koko',
+        '轻轻地','看晚霞','一刹那','英格兰','地下室','过滤器','朗姆酒',
+        '真实的','文学社','麦当劳'
       ],
       hard: [
-        '月光','星辰','微风','花瓣','黎明','梦境','回忆','温柔',
-        '故事','旋律','秘密','时光','雨滴','心跳','笑容','天空',
-        '海洋','森林','蝴蝶','烟火','远方','歌声','日落','清晨',
-        'Neuro','Evil','Vedal','yipee','Camila','Anny','Miniko'
+        '钢管','哲学','牛肉','神经','内存','蜂群','冷鱼','位置',
+        '轻轻地','看晚霞','一刹那','英格兰','地下室','过滤器','朗姆酒',
+        '真实的','文学社','麦当劳','过生日','宝可梦','万圣节','吃罐头',
+        'Neuro','Evil','Vedal','yipee','Camila','Anny','Miniko',
+        'heart','Alex','Ellie','Koko','Minawan','NeuroEcho','Minyans',
+        '不紧不慢','不快不慢','恶魔轮盘','可爱动静','存在主义','人工智能'
       ]
     };
 
