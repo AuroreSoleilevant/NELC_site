@@ -509,7 +509,7 @@
     }
     /* 虚拟键盘弹出时用 dvh 保持布局 */
     @supports (height: 100dvh) {
-      @media (max-width: 640px) {
+      @media (max-width: 1020px) {
         body { min-height: 100dvh; overflow: hidden; }
         .game-wrapper { height: 100dvh; }
       }
@@ -532,8 +532,7 @@
     #listOverlay .overlay-card {
       animation: list-bounce-in 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
-
-<p>  </style></p>
+  </style>
 </head>
 <body>
   <button class="back-link" id="backBtn" onclick="handleBack()">
@@ -642,11 +641,16 @@
         'Neuro','Evil','Vedal','yipee','Camila','Anny','Miniko'
       ],
       normal: [
-        '银色月光','星空下','微风轻拂','花瓣飘零','黎明破晓',
-        'NeuroEcho','minawan','yipeee','复苏之旅','拼凑记忆'
+        '月光','星辰','微风','花瓣','黎明','梦境','回忆','温柔',
+        '故事','旋律','秘密','时光','雨滴','心跳','笑容','天空',
+        '海洋','森林','蝴蝶','烟火','远方','歌声','日落','清晨',
+        'Neuro','Evil','Vedal','yipee','Camila','Anny','Miniko'
       ],
       hard: [
-        '奇点复苏之旅开启','拼凑破碎的美好时光','文字是灵魂的回声'
+        '月光','星辰','微风','花瓣','黎明','梦境','回忆','温柔',
+        '故事','旋律','秘密','时光','雨滴','心跳','笑容','天空',
+        '海洋','森林','蝴蝶','烟火','远方','歌声','日落','清晨',
+        'Neuro','Evil','Vedal','yipee','Camila','Anny','Miniko'
       ]
     };
 
@@ -655,20 +659,20 @@
       easy: {
         baseSpeed: 0.35, interval: 2500, maxWords: 4, lives: 7,
         speedUpEvery: 20, intervalDecrement: 150, minInterval: 1000,
-        speedIncrement: 0.1, maxSpeed: 5.0,
-        desc: '7 条生命 · 简单词汇'
+        speedIncrement: 0.1, maxSpeed: 0.7,
+        desc: '7 条生命 · 醉酒Vedal'
       },
       normal: {
-        baseSpeed: 0.35, interval: 2500, maxWords: 6, lives: 5,
-        speedUpEvery: 20, intervalDecrement: 150, minInterval: 1000,
-        speedIncrement: 0.1, maxSpeed: 5.0,
-        desc: '5 条生命 · 中等词汇'
+        baseSpeed: 0.5, interval: 2200, maxWords: 6, lives: 5,
+        speedUpEvery: 20, intervalDecrement: 150, minInterval: 900,
+        speedIncrement: 0.1, maxSpeed: 1,
+        desc: '5 条生命 · Evil钢管'
       },
       hard: {
-        baseSpeed: 0.35, interval: 2500, maxWords: 8, lives: 3,
-        speedUpEvery: 20, intervalDecrement: 150, minInterval: 1000,
-        speedIncrement: 0.1, maxSpeed: 5.0,
-        desc: '3 条生命 · 长句词汇'
+        baseSpeed: 0.7, interval: 1800, maxWords: 8, lives: 3,
+        speedUpEvery: 15, intervalDecrement: 200, minInterval: 700,
+        speedIncrement: 0.15, maxSpeed: 1.5,
+        desc: '3 条生命 · Neuro的哲学课'
       }
     };
 
@@ -772,7 +776,8 @@
 
       const speedVariance = 0.85 + Math.random() * 0.3;
       // 根据实际 canvas 高度等比缩放速度，保证移动端体验一致
-      const heightScale = canvas.clientHeight / 600;
+      // 用 Math.max(h, 300) 防止虚拟键盘压缩后 canvas 过矮导致速度趋近于零
+      const heightScale = Math.max(canvas.clientHeight, 300) / 600;
       const word = {
         id: state.wordIdCounter++, text, x, y: -50,
         speed: state.currentSpeed * speedVariance * heightScale, el
@@ -803,7 +808,7 @@
         // 间隔到下限后，加速移动速度
         else if (state.currentSpeed < cfg.maxSpeed) {
           state.currentSpeed = Math.min(state.currentSpeed + cfg.speedIncrement, cfg.maxSpeed);
-          const _hs = canvas.clientHeight / 600;
+          const _hs = Math.max(canvas.clientHeight, 300) / 600;
           state.words.forEach(w => {
             if (!w.removed) w.speed = state.currentSpeed * (0.85 + Math.random() * 0.3) * _hs;
           });
