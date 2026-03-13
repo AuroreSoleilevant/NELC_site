@@ -10,7 +10,6 @@
   z-index: 9999;
   user-select: none;
   -webkit-user-drag: none;
-  transition: bottom 200ms linear;
 }
 
 /* 小牛 sprite 图片 */

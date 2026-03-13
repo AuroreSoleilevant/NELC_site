@@ -87,6 +87,21 @@
 
     let stopRequested = false;
 
+    // 拖拽 / 物理状态
+    let isDragging = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+    // 物理飞行
+    // 死去的物理学突然开始攻击我
+    let isFlying = false; // 松手后物理模拟阶段
+    let flyX = 0; // fixed left（px）
+    let flyY = 0; // fixed top（px）
+    let velX = 0; // px/ms
+    let velY = 0; // px/ms
+    // 速度采样窗口（最近 N 帧鼠标位移）
+    const VEL_SAMPLES = 5;
+    const velSamples = []; // { x, y, t }
+
     // 闲置控制
     let idleTimeout = null;
 
@@ -106,27 +121,6 @@
       const vh = window.innerHeight;
       const rect = puppet.getBoundingClientRect();
       return { vw, vh, rect };
-    }
-
-    const footer = document.querySelector("footer");
-
-    // ========== footer 处理 ==========
-    // 如果页面含有 footer，小人将站在 footer 顶部（bottom = footerHeight）
-    function updateBottomByFooter() {
-      if (!footer) {
-        puppet.style.bottom = "0px";
-        return;
-      }
-
-      const rect = footer.getBoundingClientRect();
-      const vh = window.innerHeight;
-
-      if (rect.top < vh) {
-        const overlap = vh - rect.top;
-        puppet.style.bottom = overlap + "px";
-      } else {
-        puppet.style.bottom = "0px";
-      }
     }
 
     // ========== 启停函数 ==========
@@ -155,6 +149,12 @@
       // 请求停止当前行走（如果存在 stopWatcher 守护它会在下一周期重置 state）
       stopRequested = true;
       state = "standing";
+      isFlying = false;
+      if (isDragging) {
+        document.removeEventListener("mousemove", onDragMove);
+        document.removeEventListener("mouseup", onDragEnd);
+        isDragging = false;
+      }
 
       // 隐藏 DOM（这样也不会触发鼠标交互）
       puppet.style.display = "none";
@@ -168,6 +168,35 @@
     function enablePuppet() {
       if (puppetEnabled) return;
       puppetEnabled = true;
+
+      // 完全重置所有状态与位置
+      if (walkTimer) {
+        clearInterval(walkTimer);
+        walkTimer = null;
+      }
+      if (idleTimeout) {
+        clearTimeout(idleTimeout);
+        idleTimeout = null;
+      }
+      if (isDragging) {
+        document.removeEventListener("mousemove", onDragMove);
+        document.removeEventListener("mouseup", onDragEnd);
+      }
+      isDragging = false;
+      isFlying = false;
+      velX = 0;
+      velY = 0;
+      stopRequested = false;
+      state = "standing";
+      currentS = Math.random() < 0.5 ? 0 : 1;
+      sprite.src = S[currentS];
+
+      // 重置位置到左下角
+      x = 8;
+      puppet.style.transition = "";
+      puppet.style.top = "";
+      puppet.style.bottom = "0px";
+      puppet.style.left = x + "px";
 
       // 显示 DOM
       puppet.style.display = "block";
@@ -195,6 +224,7 @@
       // 交互（mouseenter/leave 始终绑定，隐藏状态下不会触发）
       puppet.addEventListener("mouseenter", onHover);
       puppet.addEventListener("mouseleave", onLeave);
+      puppet.addEventListener("mousedown", onPuppetMouseDown);
 
       // 读取用户保存的选择（localStorage: 'neuro-enabled'）
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -219,9 +249,6 @@
         bubble.classList.remove("show");
         bubble.setAttribute("aria-hidden", "true");
       }
-
-      // 立即计算一次 footer 位置（即便隐藏，调用无害）
-      updateBottomByFooter();
 
       // 尝试加载 JSON（主文件名，希望后面别忘了改：mini_neuro_sentence.json）
       fetchPhrases().catch((err) => {
@@ -283,18 +310,95 @@
           return;
         }
 
-        const dt = now - lastTime;
+        const dt = Math.min(now - lastTime, 64); // 最大 64ms，防止丢帧跳变
         lastTime = now;
 
-        // 每帧更新 footer 碰撞（保证抬起同步）
-        updateBottomByFooter();
+        // ---- 物理飞行阶段 ----
+        if (isFlying) {
+          // ── 物理参数（可调/可以一脚踹倒物理学大厦）────────────────
+          // GRAVITY：重力加速度 px/ms²；越大越快落地，推荐范围 0.003~0.012，孩子们我们去火星吧
+          const GRAVITY = 0.008;
+          // BOUNCE_Y：落地纵向弹性 0=完全不弹 1=完全弹回；保持小值防止乒乓牛
+          const BOUNCE_Y = 0.1;
+          // FRICTION：落地后横向每 16ms 速度保留比例；越小停得越快，推荐 0.70~0.90
+          const FRICTION = 0.78;
+          // WALL_RESTITUTION：撞侧壁弹性；0=不弹 1=完全弹
+          const WALL_RESTITUTION = 0.4;
+          // SETTLE_VEL：横速低于此值（px/ms）判定为静止
+          const SETTLE_VEL = 0.05;
+          // MAX_V（松手初速上限）在 onDragEnd 里设置，默认 2.5 px/ms
+          // ────────────────────────────────────────────────────────
 
+          const pw = puppet.offsetWidth;
+          const ph = puppet.offsetHeight;
+          const vw = window.innerWidth;
+          const vh = window.innerHeight;
+
+          const floorY = vh - ph; // 永远落在视口底部
+
+          velY += GRAVITY * dt;
+          flyX += velX * dt;
+          flyY += velY * dt;
+
+          // 侧壁碰撞
+          if (flyX < 0) {
+            flyX = 0;
+            velX = Math.abs(velX) * WALL_RESTITUTION;
+          } else if (flyX > vw - pw) {
+            flyX = vw - pw;
+            velX = -Math.abs(velX) * WALL_RESTITUTION;
+          }
+
+          // 落地碰撞
+          const onFloor = flyY >= floorY;
+          if (onFloor) {
+            flyY = floorY;
+            // 纵向速度极小时直接清零，避免微振
+            if (Math.abs(velY) < 0.3) {
+              velY = 0;
+            } else {
+              velY = -Math.abs(velY) * BOUNCE_Y;
+            }
+            // 落地摩擦衰减（基于 dt，避免帧率依赖）
+            const fric = Math.pow(FRICTION, dt / 16);
+            velX *= fric;
+          }
+
+          // 判断是否完全静止
+          const settled = onFloor && velY === 0 && Math.abs(velX) < SETTLE_VEL;
+          if (settled) {
+            velX = 0;
+            isFlying = false;
+            x = flyX;
+            clampX();
+            puppet.style.transition = "";
+            puppet.style.top = "";
+            puppet.style.bottom = "0px";
+            puppet.style.left = Math.round(x) + "px";
+            // 恢复站立并启动闲置
+            state = "standing";
+            currentS = 1;
+            sprite.src = S[currentS];
+            scheduleIdleAction();
+          } else {
+            puppet.style.left = Math.round(flyX) + "px";
+            puppet.style.top = Math.round(flyY) + "px";
+          }
+
+          rafId = requestAnimationFrame(loop);
+          return; // 飞行中跳过常规逻辑
+        }
+
+        // ---- 常规阶段 ----
         if (state === "walking") {
           x += (facing === "right" ? 1 : -1) * speed * (dt / 16);
         }
 
-        clampX();
-        puppet.style.left = Math.round(x) + "px";
+        // 拖拽中不更新 left / bottom，由拖拽逻辑全权控制
+        if (!isDragging) {
+          clampX();
+          puppet.style.left = Math.round(x) + "px";
+        }
 
         if (bubble.classList.contains("show")) {
           positionBubbleNearPuppet();
@@ -572,6 +676,100 @@
         bubble.style.left = left + "px";
         bubble.style.top = top + "px";
       });
+    }
+
+    // ========== 拖拽 + 物理投掷 ==========
+    function onPuppetMouseDown(e) {
+      if (!puppetEnabled) return;
+      if (e.button !== 0) return;
+      e.preventDefault();
+
+      // 如果正在飞行中被再次点击，直接接住
+      isFlying = false;
+
+      // 停止所有动画状态
+      isDragging = true;
+      stopRequested = true;
+      state = "dragging";
+      if (walkTimer) {
+        clearInterval(walkTimer);
+        walkTimer = null;
+      }
+      if (idleTimeout) {
+        clearTimeout(idleTimeout);
+        idleTimeout = null;
+      }
+
+      sprite.src = S[1]; // S_look_you.svg
+
+      const pr = puppet.getBoundingClientRect();
+      dragOffsetX = e.clientX - pr.left;
+      dragOffsetY = e.clientY - pr.top;
+
+      // 切为 fixed + top 定位
+      puppet.style.transition = "";
+      puppet.style.bottom = "auto";
+      puppet.style.left = pr.left + "px";
+      puppet.style.top = pr.top + "px";
+
+      // 清空速度采样
+      velSamples.length = 0;
+      velSamples.push({ x: e.clientX, y: e.clientY, t: performance.now() });
+
+      hideBubble();
+      document.addEventListener("mousemove", onDragMove);
+      document.addEventListener("mouseup", onDragEnd);
+    }
+
+    function onDragMove(e) {
+      if (!isDragging) return;
+      const newLeft = e.clientX - dragOffsetX;
+      const newTop = e.clientY - dragOffsetY;
+      puppet.style.left = newLeft + "px";
+      puppet.style.top = newTop + "px";
+
+      // 滑动窗口采样（只保留最近 VEL_SAMPLES 条）
+      velSamples.push({ x: e.clientX, y: e.clientY, t: performance.now() });
+      if (velSamples.length > VEL_SAMPLES) velSamples.shift();
+    }
+
+    function onDragEnd(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      document.removeEventListener("mousemove", onDragMove);
+      document.removeEventListener("mouseup", onDragEnd);
+
+      const pr = puppet.getBoundingClientRect();
+      flyX = pr.left;
+      flyY = pr.top;
+
+      // 从采样窗口估算初速度（px/ms）
+      velX = 0;
+      velY = 0;
+      if (velSamples.length >= 2) {
+        const a = velSamples[0];
+        const b = velSamples[velSamples.length - 1];
+        const dt = b.t - a.t;
+        if (dt > 0) {
+          velX = (b.x - a.x) / dt;
+          velY = (b.y - a.y) / dt;
+          // 限制最大初速（防止甩飞出屏幕）
+          const MAX_V = 2.5; // px/ms
+          const mag = Math.sqrt(velX * velX + velY * velY);
+          if (mag > MAX_V) {
+            velX = (velX / mag) * MAX_V;
+            velY = (velY / mag) * MAX_V;
+          }
+        }
+      }
+
+      // 确保处于 fixed+top 模式，交由渲染循环物理积分
+      puppet.style.transition = "";
+      puppet.style.bottom = "auto";
+      puppet.style.left = Math.round(flyX) + "px";
+      puppet.style.top = Math.round(flyY) + "px";
+
+      isFlying = true;
     }
 
     // ========== 事件绑定 ==========
