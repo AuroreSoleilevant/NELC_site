@@ -71,3 +71,8 @@
   border-radius: 6px;
   cursor: pointer;
 }
+
+#neuro-toggle.neuro-off {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+}

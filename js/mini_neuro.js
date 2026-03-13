@@ -83,6 +83,8 @@
 
     // 行走定时器
     let walkTimer = null;
+    // 得注意下startWalkingShort 内部有个 stopWatcher (局部变量)，无法在外部直接清除
+
     let stopRequested = false;
 
     // 闲置控制
@@ -92,6 +94,9 @@
     let phrases = null;
     let forcedNextId = null;
     let lastShownId = null;
+
+    // Neuro 启停控制（由按钮/本地存储控制）
+    let puppetEnabled = true;
 
     // ========== 辅助：viewport / bounds ==========
     function getBounds() {
@@ -105,7 +110,6 @@
 
     // ========== footer 处理 ==========
     // 如果页面含有 footer，小人将站在 footer 顶部（bottom = footerHeight）
-    // 虽然看起来有点延迟，如果有人有精力就帮我修一下吧
     function updateBottomByFooter() {
       if (!footer) {
         puppet.style.bottom = "0px";
@@ -123,23 +127,98 @@
       }
     }
 
+    // ========== 启停函数 ==========
+    let rafId = null;
+
+    function disablePuppet() {
+      // 标记
+      puppetEnabled = false;
+
+      // 取消 rAF
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+
+      // 停止闲置行为和行走定时器
+      if (idleTimeout) {
+        clearTimeout(idleTimeout);
+        idleTimeout = null;
+      }
+      if (walkTimer) {
+        clearInterval(walkTimer);
+        walkTimer = null;
+      }
+
+      // 请求停止当前行走（如果存在 stopWatcher 守护它会在下一周期重置 state）
+      stopRequested = true;
+      state = "standing";
+
+      // 隐藏 DOM（这样也不会触发鼠标交互）
+      puppet.style.display = "none";
+      bubble.classList.remove("show");
+      bubble.setAttribute("aria-hidden", "true");
+
+      // 更新按钮样式（若存在按钮）
+      updateNeuroIcon();
+    }
+
+    function enablePuppet() {
+      if (puppetEnabled) return;
+      puppetEnabled = true;
+
+      // 显示 DOM
+      puppet.style.display = "block";
+
+      // 恢复闲置行为与渲染循环
+      scheduleIdleAction();
+      startRenderLoop();
+
+      // 更新按钮样式
+      updateNeuroIcon();
+    }
+
+    function updateNeuroIcon() {
+      const btn = document.getElementById("neuro-toggle");
+      if (!btn) return;
+      btn.classList.toggle("neuro-off", !puppetEnabled);
+    }
+
     // ========== 初始化 ==========
     function init() {
       // 初始站立姿态
       currentS = Math.random() < 0.5 ? 0 : 1;
       sprite.src = S[currentS];
 
-      // 交互
+      // 交互（mouseenter/leave 始终绑定，隐藏状态下不会触发）
       puppet.addEventListener("mouseenter", onHover);
       puppet.addEventListener("mouseleave", onLeave);
 
-      // 启动闲置循环
-      scheduleIdleAction();
+      // 读取用户保存的选择（localStorage: 'neuro-enabled'）
+      const saved = localStorage.getItem("neuro-enabled");
+      if (saved === null) {
+        // 没有记录时根据屏幕宽度决定默认行为
+        if (window.innerWidth < 768) {
+          puppetEnabled = false;
+        } else {
+          puppetEnabled = true;
+        }
+      } else {
+        puppetEnabled = saved === "1";
+      }
 
-      // 启动渲染循环
-      startRenderLoop();
+      // 根据 puppetEnabled 决定是否启动循环与闲置
+      if (puppetEnabled) {
+        scheduleIdleAction();
+        startRenderLoop();
+        puppet.style.display = "block";
+      } else {
+        puppet.style.display = "none";
+        bubble.classList.remove("show");
+        bubble.setAttribute("aria-hidden", "true");
+      }
 
-      // 立即计算一次 footer 位置
+      // 立即计算一次 footer 位置（即便隐藏，调用无害）
       updateBottomByFooter();
 
       // 尝试加载 JSON（主文件名，希望后面别忘了改：mini_neuro_sentence.json）
@@ -170,17 +249,42 @@
           reader.readAsText(f, "utf-8");
         });
       }
+
+      // 绑定 butterfly 的按钮（若存在）
+      const neuroBtn = document.getElementById("neuro-toggle");
+      if (neuroBtn) {
+        neuroBtn.addEventListener("click", () => {
+          if (puppetEnabled) {
+            disablePuppet();
+            localStorage.setItem("neuro-enabled", "0");
+          } else {
+            enablePuppet();
+            localStorage.setItem("neuro-enabled", "1");
+          }
+        });
+      }
+
+      // 初始化按钮样式
+      updateNeuroIcon();
     }
 
     // ========== 渲染循环 ==========
-    let rafId = null;
     function startRenderLoop() {
+      // 如果已经在运行则不重复启动
+      if (rafId) return;
+
       let lastTime = performance.now();
       function loop(now) {
+        // 如果被禁用则退出循环（并不再请求下一帧）
+        if (!puppetEnabled) {
+          rafId = null;
+          return;
+        }
+
         const dt = now - lastTime;
         lastTime = now;
 
-        // 每帧更新 footer 碰撞
+        // 每帧更新 footer 碰撞（保证抬起同步）
         updateBottomByFooter();
 
         if (state === "walking") {
@@ -199,6 +303,7 @@
 
       rafId = requestAnimationFrame(loop);
     }
+
     function clampX() {
       const { vw, rect } = getBounds();
       const w = rect.width || puppet.offsetWidth;
@@ -212,6 +317,13 @@
       if (idleTimeout) clearTimeout(idleTimeout);
       // 可以调整：闲置动作间隔分布（目前 3s .. 10s）
       const delay = 3000 + Math.random() * 7000; // <-- 闲置间隔分布
+
+      // 如果当前被禁用则不安排
+      if (!puppetEnabled) {
+        idleTimeout = null;
+        return;
+      }
+
       idleTimeout = setTimeout(() => {
         performIdleAction();
         scheduleIdleAction();
@@ -219,13 +331,11 @@
     }
 
     function performIdleAction() {
+      if (!puppetEnabled) return;
       if (state !== "standing") return;
       const r = Math.random();
 
       // 动作的概率分配
-      // 1) 眨眼概率（当前占比 0.45）
-      // 2) 切换站立姿态概率（当前占比 0.20）
-      // 3) 开始短暂走路概率（剩余 ~0.35）
       if (r < 0.45) {
         // 眨眼
         triggerBlink();
@@ -241,6 +351,7 @@
 
     // 眨眼实现（S -> C1 -> C2 -> S）
     function triggerBlink() {
+      if (!puppetEnabled) return;
       if (state !== "standing") return;
       state = "blinking";
       sprite.src = C[0];
@@ -256,6 +367,7 @@
 
     // ========== 行走 ==========
     function startWalkingShort() {
+      if (!puppetEnabled) return;
       if (state !== "standing") return;
 
       const { vw, rect } = getBounds();
@@ -278,15 +390,19 @@
       const frameInterval = 180; // ms per walk frame <-- 改变步伐速度/帧率
       if (walkTimer) clearInterval(walkTimer);
       walkTimer = setInterval(() => {
+        // 如果被禁用则停止计时器
+        if (!puppetEnabled) {
+          clearInterval(walkTimer);
+          walkTimer = null;
+          return;
+        }
         walkIndex = (walkIndex + 1) % W.length;
         sprite.src = W[walkIndex];
         // 停止请求的随机触发（仅在未来 W1 时生效）
-        // 这里可以改在循环中止步的概率
         if (Math.random() < 0.08) stopRequested = true;
       }, frameInterval);
 
       // 本次走动持续时间（在此时间后会请求停止，实际停止需等到 W1）
-      // 这里可以改本次走动时长范围（ms）
       const walkDuration = 600 + Math.random() * 1400; // 0.6s .. 2.0s
       setTimeout(() => {
         stopRequested = true;
@@ -294,6 +410,10 @@
 
       // 监督停止条件：只有在 W1（walkIndex == 0）时才能真正停止并切回 S
       const stopWatcher = setInterval(() => {
+        if (!puppetEnabled) {
+          clearInterval(stopWatcher);
+          return;
+        }
         if (stopRequested && walkIndex === 0) {
           clearInterval(walkTimer);
           walkTimer = null;
@@ -301,7 +421,6 @@
           state = "standing";
           currentS = Math.random() < 0.5 ? 0 : 1;
           sprite.src = S[currentS];
-          // 保持朝向类（别删），这样下一次走动朝向延续
           puppet.classList.toggle("facing-right", facing === "right");
         }
       }, 80);
@@ -363,6 +482,7 @@
 
     // 悬浮触发（鼠标进入）
     async function onHover(ev) {
+      if (!puppetEnabled) return;
       try {
         await fetchPhrases();
       } catch (e) {
@@ -413,11 +533,13 @@
 
     // ========== 气泡显示/隐藏及位置 ==========
     function showBubble(text) {
+      if (!puppetEnabled) return;
       bubble.textContent = text || "";
 
       bubble.classList.add("show");
       bubble.setAttribute("aria-hidden", "false");
 
+      // 在下一帧定位，确保浏览器完成 layout
       requestAnimationFrame(() => {
         positionBubbleNearPuppet();
       });
@@ -427,7 +549,7 @@
       bubble.setAttribute("aria-hidden", "true");
     }
 
-    // 将气泡放在小人头顶（或在顶部不足时放到下方，当然我觉得下面大概也没空），并在小人移动时被 repeatedly 调用以实现跟随
+    // 将气泡放在小人头顶（或在顶部不足时放到下方），并在小人移动时被 repeatedly 调用以实现跟随
     function positionBubbleNearPuppet() {
       const pr = puppet.getBoundingClientRect();
 
