@@ -98,6 +98,8 @@
     // Neuro 启停控制（由按钮/本地存储控制）
     let puppetEnabled = true;
 
+    const STORAGE_KEY = "neuro-enabled-v2";
+
     // ========== 辅助：viewport / bounds ==========
     function getBounds() {
       const vw = window.innerWidth;
@@ -195,7 +197,7 @@
       puppet.addEventListener("mouseleave", onLeave);
 
       // 读取用户保存的选择（localStorage: 'neuro-enabled'）
-      const saved = localStorage.getItem("neuro-enabled");
+      const saved = localStorage.getItem(STORAGE_KEY);
       if (saved === null) {
         // 没有记录时根据屏幕宽度决定默认行为
         if (window.innerWidth < 768) {
@@ -256,10 +258,10 @@
         neuroBtn.addEventListener("click", () => {
           if (puppetEnabled) {
             disablePuppet();
-            localStorage.setItem("neuro-enabled", "0");
+            localStorage.setItem(STORAGE_KEY, "0");
           } else {
             enablePuppet();
-            localStorage.setItem("neuro-enabled", "1");
+            localStorage.setItem(STORAGE_KEY, "1");
           }
         });
       }
@@ -350,6 +352,7 @@
     }
 
     // 眨眼实现（S -> C1 -> C2 -> S）
+    // 其实我不确定要不要多补一个C1，如果需要的话记得告诉我
     function triggerBlink() {
       if (!puppetEnabled) return;
       if (state !== "standing") return;
