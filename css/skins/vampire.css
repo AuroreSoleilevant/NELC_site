@@ -1,6 +1,6 @@
 :root:not([data-theme="dark"]) {
   /* 全局页面背景底色 */
-  --heo-background: #2a1b1f;
+  --heo-background: #460112;
 
   /* 卡片 */
   --card-bg: rgba(48, 42, 45, 0.92); /* 背景色 */
