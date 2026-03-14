@@ -10,6 +10,8 @@
   z-index: 9999;
   user-select: none;
   -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
 }
 
 /* 小牛 sprite 图片 */

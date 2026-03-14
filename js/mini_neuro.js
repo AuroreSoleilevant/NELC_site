@@ -92,7 +92,6 @@
     let dragOffsetX = 0;
     let dragOffsetY = 0;
     // 物理飞行
-    // 死去的物理学突然开始攻击我
     let isFlying = false; // 松手后物理模拟阶段
     let flyX = 0; // fixed left（px）
     let flyY = 0; // fixed top（px）
@@ -101,6 +100,14 @@
     // 速度采样窗口（最近 N 帧鼠标位移）
     const VEL_SAMPLES = 5;
     const velSamples = []; // { x, y, t }
+
+    // 触摸状态
+    let touchLongPressTimer = null; // 长按计时器
+    let touchDragReady = false; // 长按后进入可拖拽状态
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const TOUCH_LONG_PRESS_MS = 400; // 长按判定时长（ms）
+    const TOUCH_MOVE_CANCEL_PX = 10; // 手指移动超过此距离取消长按
 
     // 闲置控制
     let idleTimeout = null;
@@ -226,6 +233,12 @@
       puppet.addEventListener("mouseleave", onLeave);
       puppet.addEventListener("mousedown", onPuppetMouseDown);
 
+      // 触摸事件
+      puppet.addEventListener("touchstart", onTouchStart, { passive: false });
+      puppet.addEventListener("touchmove", onTouchMove, { passive: false });
+      puppet.addEventListener("touchend", onTouchEnd, { passive: false });
+      puppet.addEventListener("touchcancel", onTouchCancel, { passive: false });
+
       // 读取用户保存的选择（localStorage: 'neuro-enabled'）
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved === null) {
@@ -315,10 +328,10 @@
 
         // ---- 物理飞行阶段 ----
         if (isFlying) {
-          // ── 物理参数（可调/可以一脚踹倒物理学大厦）────────────────
-          // GRAVITY：重力加速度 px/ms²；越大越快落地，推荐范围 0.003~0.012，孩子们我们去火星吧
+          // ── 物理参数（可调）──────────────────────────────────────
+          // GRAVITY：重力加速度 px/ms²；越大越快落地，推荐范围 0.003~0.012
           const GRAVITY = 0.008;
-          // BOUNCE_Y：落地纵向弹性 0=完全不弹 1=完全弹回；保持小值防止乒乓牛
+          // BOUNCE_Y：落地纵向弹性 0=完全不弹 1=完全弹回；保持小值防止乒乓
           const BOUNCE_Y = 0.1;
           // FRICTION：落地后横向每 16ms 速度保留比例；越小停得越快，推荐 0.70~0.90
           const FRICTION = 0.78;
@@ -344,19 +357,23 @@
           if (flyX < 0) {
             flyX = 0;
             velX = Math.abs(velX) * WALL_RESTITUTION;
+            vibrate(15);
           } else if (flyX > vw - pw) {
             flyX = vw - pw;
             velX = -Math.abs(velX) * WALL_RESTITUTION;
+            vibrate(15);
           }
 
           // 落地碰撞
           const onFloor = flyY >= floorY;
           if (onFloor) {
+            const wasAboveFloor = flyY - velY * dt < floorY; // 本帧才着地
             flyY = floorY;
             // 纵向速度极小时直接清零，避免微振
             if (Math.abs(velY) < 0.3) {
               velY = 0;
             } else {
+              if (wasAboveFloor) vibrate(20);
               velY = -Math.abs(velY) * BOUNCE_Y;
             }
             // 落地摩擦衰减（基于 dt，避免帧率依赖）
@@ -683,11 +700,138 @@
       if (!puppetEnabled) return;
       if (e.button !== 0) return;
       e.preventDefault();
+      const pr = puppet.getBoundingClientRect();
+      dragOffsetX = e.clientX - pr.left;
+      dragOffsetY = e.clientY - pr.top;
+      _enterDrag(e.clientX, e.clientY);
+      document.addEventListener("mousemove", onDragMove);
+      document.addEventListener("mouseup", onDragEnd);
+    }
 
-      // 如果正在飞行中被再次点击，直接接住
+    function onDragMove(e) {
+      if (!isDragging) return;
+      const newLeft = e.clientX - dragOffsetX;
+      const newTop = e.clientY - dragOffsetY;
+      puppet.style.left = newLeft + "px";
+      puppet.style.top = newTop + "px";
+      velSamples.push({ x: e.clientX, y: e.clientY, t: performance.now() });
+      if (velSamples.length > VEL_SAMPLES) velSamples.shift();
+    }
+
+    function onDragEnd(e) {
+      if (!isDragging) return;
+      document.removeEventListener("mousemove", onDragMove);
+      document.removeEventListener("mouseup", onDragEnd);
+      _releaseDrag(e);
+    }
+
+    // ========== 触摸处理 ==========
+    function vibrate(pattern) {
+      try {
+        if (navigator.vibrate) navigator.vibrate(pattern);
+      } catch (e) {}
+    }
+
+    function onTouchStart(e) {
+      if (!puppetEnabled) return;
+      e.preventDefault(); // 阻止长按菜单 & 页面滚动
+
+      // 如果正在飞行，直接接住（同鼠标点击逻辑）
+      if (isFlying) {
+        isFlying = false;
+        const t = e.touches[0];
+        const pr = puppet.getBoundingClientRect();
+        touchDragReady = true;
+        dragOffsetX = t.clientX - pr.left;
+        dragOffsetY = t.clientY - pr.top;
+        _enterDrag(t.clientX, t.clientY);
+        return;
+      }
+
+      const t = e.touches[0];
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+      touchDragReady = false;
+
+      // 长按计时
+      touchLongPressTimer = setTimeout(() => {
+        touchLongPressTimer = null;
+        touchDragReady = true;
+        vibrate(30); // 震动提示进入拖拽
+        const pr = puppet.getBoundingClientRect();
+        dragOffsetX = touchStartX - pr.left;
+        dragOffsetY = touchStartY - pr.top;
+        _enterDrag(touchStartX, touchStartY);
+      }, TOUCH_LONG_PRESS_MS);
+    }
+
+    function onTouchMove(e) {
+      if (!puppetEnabled) return;
+      e.preventDefault();
+
+      const t = e.touches[0];
+
+      // 如果还没进入拖拽，检查是否移动过多（取消长按）
+      if (!touchDragReady) {
+        const dx = t.clientX - touchStartX;
+        const dy = t.clientY - touchStartY;
+        if (Math.sqrt(dx * dx + dy * dy) > TOUCH_MOVE_CANCEL_PX) {
+          _cancelLongPress();
+        }
+        return;
+      }
+
+      // 已在拖拽中，更新位置（复用鼠标拖拽的采样逻辑）
+      if (isDragging) {
+        const newLeft = t.clientX - dragOffsetX;
+        const newTop = t.clientY - dragOffsetY;
+        puppet.style.left = newLeft + "px";
+        puppet.style.top = newTop + "px";
+        velSamples.push({ x: t.clientX, y: t.clientY, t: performance.now() });
+        if (velSamples.length > VEL_SAMPLES) velSamples.shift();
+      }
+    }
+
+    function onTouchEnd(e) {
+      if (!puppetEnabled) return;
+      e.preventDefault();
+
+      const wasDragging = isDragging;
+      const wasLongPress = touchDragReady;
+
+      _cancelLongPress();
+
+      if (wasDragging) {
+        // 松手投掷（复用鼠标逻辑）
+        _releaseDrag(e.changedTouches[0]);
+        return;
+      }
+
+      if (!wasLongPress) {
+        // 短点击：触发台词（等同 mouseenter）
+        onHover(e);
+        // 2 秒后自动隐藏气泡（移动端没有 mouseleave）
+        setTimeout(() => hideBubble(), 2000);
+      }
+    }
+
+    function onTouchCancel(e) {
+      _cancelLongPress();
+      if (isDragging)
+        _releaseDrag(e.changedTouches[0] || { clientX: 0, clientY: 0 });
+    }
+
+    function _cancelLongPress() {
+      if (touchLongPressTimer) {
+        clearTimeout(touchLongPressTimer);
+        touchLongPressTimer = null;
+      }
+      touchDragReady = false;
+    }
+
+    // 公共：进入拖拽状态（供鼠标和触摸共用）
+    function _enterDrag(clientX, clientY) {
       isFlying = false;
-
-      // 停止所有动画状态
       isDragging = true;
       stopRequested = true;
       state = "dragging";
@@ -703,47 +847,24 @@
       sprite.src = S[1]; // S_look_you.svg
 
       const pr = puppet.getBoundingClientRect();
-      dragOffsetX = e.clientX - pr.left;
-      dragOffsetY = e.clientY - pr.top;
-
-      // 切为 fixed + top 定位
       puppet.style.transition = "";
       puppet.style.bottom = "auto";
       puppet.style.left = pr.left + "px";
       puppet.style.top = pr.top + "px";
 
-      // 清空速度采样
       velSamples.length = 0;
-      velSamples.push({ x: e.clientX, y: e.clientY, t: performance.now() });
-
+      velSamples.push({ x: clientX, y: clientY, t: performance.now() });
       hideBubble();
-      document.addEventListener("mousemove", onDragMove);
-      document.addEventListener("mouseup", onDragEnd);
     }
 
-    function onDragMove(e) {
-      if (!isDragging) return;
-      const newLeft = e.clientX - dragOffsetX;
-      const newTop = e.clientY - dragOffsetY;
-      puppet.style.left = newLeft + "px";
-      puppet.style.top = newTop + "px";
-
-      // 滑动窗口采样（只保留最近 VEL_SAMPLES 条）
-      velSamples.push({ x: e.clientX, y: e.clientY, t: performance.now() });
-      if (velSamples.length > VEL_SAMPLES) velSamples.shift();
-    }
-
-    function onDragEnd(e) {
-      if (!isDragging) return;
+    // 公共：松手投掷（供鼠标和触摸共用）
+    function _releaseDrag(pointer) {
       isDragging = false;
-      document.removeEventListener("mousemove", onDragMove);
-      document.removeEventListener("mouseup", onDragEnd);
 
       const pr = puppet.getBoundingClientRect();
       flyX = pr.left;
       flyY = pr.top;
 
-      // 从采样窗口估算初速度（px/ms）
       velX = 0;
       velY = 0;
       if (velSamples.length >= 2) {
@@ -753,8 +874,7 @@
         if (dt > 0) {
           velX = (b.x - a.x) / dt;
           velY = (b.y - a.y) / dt;
-          // 限制最大初速（防止甩飞出屏幕）
-          const MAX_V = 2.5; // px/ms
+          const MAX_V = 2.5;
           const mag = Math.sqrt(velX * velX + velY * velY);
           if (mag > MAX_V) {
             velX = (velX / mag) * MAX_V;
@@ -763,12 +883,10 @@
         }
       }
 
-      // 确保处于 fixed+top 模式，交由渲染循环物理积分
       puppet.style.transition = "";
       puppet.style.bottom = "auto";
       puppet.style.left = Math.round(flyX) + "px";
       puppet.style.top = Math.round(flyY) + "px";
-
       isFlying = true;
     }
 
