@@ -9,6 +9,8 @@
   --heo-font-color: #5a4e42; /* 普通文本 */
   --heo-link-hover-color: #ed8941; /* 链接悬停文本 */
   --heo-post-info-color: #8b6a52; /* 文章信息抬头文本颜色 */
+  --heo-selection-color: #ed8941; /* 选定文本背景颜色 */
+  --heo-selection-font-color: #ffffff; /* 选定文本颜色 */
 
   /* 顶栏 */
   --heo-header-color: rgba(107, 79, 58, 0.65); /* 背景色 */
@@ -24,6 +26,7 @@
 
   /* 滚动条 */
   --scrollbar-thumb-bg: #8b6a52; /* 滚动条滑块颜色 */
+  --scrollbar-frame: #f3ead7; /* 滚动条滑块边框颜色 */
 
   /* 分割线 */
   --heo--hr-color: #8b6a52; /* 分割线颜色 */
@@ -57,7 +60,7 @@
 /* 背景纹理 */
 :root:not([data-theme="dark"]) body {
   background-color: var(--heo-background);
-  background-image: url("/NELC_site/image/paper.png");
+  background-image: url("/NELC_site/image/skins/paper.png");
   background-repeat: repeat;
 }
 
@@ -76,7 +79,7 @@
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb {
-  border: 2px solid #f3ead7;
+  border: 2px solid var(--scrollbar-frame);
 }
 
 /* 默认链接悬停色 */
@@ -116,6 +119,12 @@
 /* 推荐框 */
 :root:not([data-theme="dark"]) .pagination-related {
   background-color: var(--heo-pagination-related-bg);
+}
+
+/* 选定 */
+::selection {
+  background: var(--heo-selection-color);
+  color: var(--heo-selection-font-color);
 }
 
 /* 文章卡片按钮 */
