@@ -472,21 +472,29 @@
       }
     }
 
-    // 眨眼实现（S -> C1 -> C2 -> S）
-    // 其实我不确定要不要多补一个C1，如果需要的话记得告诉我
+    // 眨眼实现（S -> C1 -> C2 -> C1 -> S）
     function triggerBlink() {
       if (!puppetEnabled) return;
       if (state !== "standing") return;
+
       state = "blinking";
-      sprite.src = C[0];
-      // 以下两个时间是眨眼帧持续时长，可以改
+      sprite.src = C[0]; // C1
+
+      // C1 持续时长
       setTimeout(() => {
-        sprite.src = C[1];
+        sprite.src = C[1]; // C2
+
+        // C2 持续时长
         setTimeout(() => {
-          state = "standing";
-          sprite.src = S[currentS];
-        }, 140); // <-- C2 持续时长（ms）
-      }, 120); // <-- C1 持续时长（ms）
+          sprite.src = C[0]; // 再回到 C1
+
+          // 第二次 C1 持续时长
+          setTimeout(() => {
+            state = "standing";
+            sprite.src = S[currentS]; // 回到站立帧
+          }, 120);
+        }, 140);
+      }, 120);
     }
 
     // ========== 行走 ==========
