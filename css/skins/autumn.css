@@ -1,39 +1,43 @@
 :root:not([data-theme="dark"]) {
   /* 全局页面背景底色 */
-  --heo-background: #f3ead7;
+  --heo-background: #e7a85c;
 
   /* 卡片 */
-  --card-bg: rgba(255, 252, 244, 0.9); /* 背景色 */
+  --card-bg: rgba(248, 235, 220, 0.92); /* 背景色 */
 
   /* 全局文本 */
-  --heo-font-color: #5a4e42; /* 普通文本 */
-  --heo-link-hover-color: #ed8941; /* 链接悬停文本 */
-  --heo-post-info-color: #8b6a52; /* 文章信息抬头文本颜色 */
-  --heo-selection-color: #ed8941; /* 选定文本背景颜色 */
+  --heo-font-color: #5c4033; /* 普通文本 */
+  --heo-link-hover-color: #ff5e00; /* 链接悬停文本 */
+  --heo-post-info-color: #a9826a; /* 文章信息抬头文本颜色 */
+  --heo-selection-color: #f0a45d; /* 选定文本背景颜色 */
   --heo-selection-font-color: #ffffff; /* 选定文本颜色 */
+  --heo-title-color: #d3541c; /* 文章大标题颜色，以及一些其他类似文本 */
+  --heo-sous-title-color: #c07a3f; /* 边栏次标题颜色 */
+  --heo-strong-color: #e56b2e; /* 加粗链接颜色 */
 
   /* 顶栏 */
-  --heo-header-color: rgba(107, 79, 58, 0.65); /* 背景色 */
-  --heo-header-font-color: #fdfcf8; /* 文本颜色 */
-  --heo-header-link-menu-hover-color: #ed8941; /* 菜单悬停条颜色 */
+  --heo-header-color: rgba(241, 222, 205, 0.85); /* 背景色 */
+  --heo-header-font-color: #5c4033; /* 文本颜色 */
+  --heo-header-link-menu-hover-color: #f0a45d; /* 菜单悬停条颜色 */
 
   /* 底栏 */
-  --heo-footer-color: #8b6a52; /* 背景色 */
-  --heo-footer-font-color: #fdfcf8; /* 文本颜色 */
+  --heo-footer-color: #eca65c; /* 背景色 */
+  --heo-footer-font-color: #5c4033; /* 文本颜色 */
 
   /* 侧栏 */
-  --heo-card-archive-bg: rgba(176, 120, 83, 0.7); /* 背景色 */
+  --heo-card-archive-bg: rgba(243, 226, 209, 0.88); /* 背景色 */
+  --heo-chapter-color: #e56b2e; /* 目录当前章节颜色块 */
 
   /* 滚动条 */
-  --scrollbar-thumb-bg: #8b6a52; /* 滚动条滑块颜色 */
-  --scrollbar-frame: #f3ead7; /* 滚动条滑块边框颜色 */
+  --scrollbar-thumb-bg: #e56b2e; /* 滚动条滑块颜色 */
+  --scrollbar-frame: #d2a98c; /* 滚动条滑块边框颜色 */
 
   /* 分割线 */
-  --heo--hr-color: #8b6a52; /* 分割线颜色 */
-  --heo-he--before-color: #ed8941; /* 分割线前的文本颜色 */
+  --heo--hr-color: #e56b2e; /* 分割线颜色 */
+  --heo-he--before-color: #f0a45d; /* 分割线前的文本颜色 */
 
   /* 推荐框 */
-  --heo-pagination-related-bg: #ff6a00; /* 推荐框背景色 */
+  --heo-pagination-related-bg: #e1b48c; /* 推荐框背景色 */
 }
 
 /* 顶栏背景色 */
@@ -56,7 +60,7 @@
   background: var(--heo-background);
   color: var(--heo-font-color);
   background-color: var(--heo-background);
-  background-image: url("/NELC_site/image/skins/paper.png");
+  background-image: url("/NELC_site/image/skins/autumn.png");
   background-repeat: repeat;
 }
 
@@ -118,14 +122,57 @@
 }
 
 /* 选定 */
-::selection {
+:root:not([data-theme="dark"]) ::selection {
   background: var(--heo-selection-color);
   color: var(--heo-selection-font-color);
+}
+
+/* 文章大标题色 */
+:root:not([data-theme="dark"]) .article-title,
+:root:not([data-theme="dark"]) .length-num,
+:root:not([data-theme="dark"]) h1:has(.headerlink),
+:root:not([data-theme="dark"]) h2:has(.headerlink) {
+  color: var(--heo-title-color) !important;
+}
+
+/* 加粗链接 */
+:root:not([data-theme="dark"]) strong a {
+  color: var(--heo-strong-color);
+}
+
+/* 边栏次标题 */
+:root:not([data-theme="dark"]) .headline,
+:root:not([data-theme="dark"]) .title,
+:root:not([data-theme="dark"]) .card-archive-list-date,
+:root:not([data-theme="dark"]) .card-archive-list-count,
+:root:not([data-theme="dark"]) .card-category-list-link {
+  color: var(--heo-sous-title-color) !important;
+}
+
+/* 边栏目录文本 */
+:root:not([data-theme="dark"]) .toc-link:not(.active) .toc-number,
+:root:not([data-theme="dark"]) .toc-link:not(.active) .toc-text {
+  color: var(--heo-sous-title-color);
+}
+
+/* 边栏当前章节颜色块 */
+:root:not([data-theme="dark"]) .toc-link.active {
+  background: var(--heo-chapter-color) !important;
+}
+
+/* 杂项页面内容 */
+:root:not([data-theme="dark"]) .category-list-link {
+  color: var(--heo-font-color);
 }
 
 /* 友情链接按钮 */
 :root:not([data-theme="dark"]) .flink-list-item::before {
   background: var(--heo-background) !important;
+}
+
+:root:not([data-theme="dark"]) .flink-item-name,
+:root:not([data-theme="dark"]) .flink-item-desc {
+  color: var(--heo-font-color) !important;
 }
 
 /* 文章卡片按钮 */
@@ -135,20 +182,23 @@
     transform 0.25s ease,
     box-shadow 0.25s ease;
   transform: translateY(0);
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
   border-radius: 8px;
+  background-color: #fff;
   cursor: pointer; /* 鼠标悬停显示手型 */
 }
 /* 悬停抬起 */
 .recent-post-item:hover {
-  transform: translateY(-10px); /* 抬起距离 */
+  transform: translateY(-10px);
   box-shadow:
-    0 10px 20px rgba(139, 106, 82, 0.15),
-    0 6px 6px rgba(139, 106, 82, 0.1) !important;
+    0 12px 24px rgba(214, 122, 52, 0.18),
+    0 6px 10px rgba(168, 92, 38, 0.12),
+    0 0 12px rgba(240, 164, 93, 0.25) !important;
 }
 /* 按下效果 */
 .recent-post-item:active {
   transform: translateY(8px); /* 下压 */
   box-shadow:
-    0 5px 10px rgba(139, 106, 82, 0.1),
-    0 3px 3px rgba(139, 106, 82, 0.05) !important; /* 阴影缩小来模拟按压 */
+    inset 0 4px 8px rgba(168, 92, 38, 0.15),
+    0 4px 6px rgba(214, 122, 52, 0.12) !important; /* 阴影缩小来模拟按压 */
 }
