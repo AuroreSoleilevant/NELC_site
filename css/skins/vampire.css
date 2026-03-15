@@ -144,7 +144,8 @@
 :root:not([data-theme="dark"]) .headline,
 :root:not([data-theme="dark"]) .title,
 :root:not([data-theme="dark"]) .card-archive-list-date,
-:root:not([data-theme="dark"]) .card-archive-list-count {
+:root:not([data-theme="dark"]) .card-archive-list-count,
+:root:not([data-theme="dark"]) .card-category-list-link {
   color: var(--heo-sous-title-color) !important;
 }
 
@@ -157,6 +158,11 @@
 /* 边栏当前章节颜色块 */
 :root:not([data-theme="dark"]) .toc-link.active {
   background: var(--heo-chapter-color) !important;
+}
+
+/* 杂项页面内容 */
+:root:not([data-theme="dark"]) .category-list-link {
+  color: var(--heo-font-color);
 }
 
 /* 文章卡片按钮 */

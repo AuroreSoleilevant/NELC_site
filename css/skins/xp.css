@@ -157,6 +157,11 @@
   background: var(--heo-chapter-color) !important;
 }
 
+/* 分类悬停特别修复 */
+:root:not([data-theme="dark"]) .card-category-list-link:hover {
+  color: #4c4948 !important;
+}
+
 /* 文章卡片按钮 */
 /* 默认状态 */
 .recent-post-item {
