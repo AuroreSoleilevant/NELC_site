@@ -165,6 +165,16 @@
   color: var(--heo-font-color);
 }
 
+/* 友情链接按钮 */
+:root:not([data-theme="dark"]) .flink-list-item::before {
+  background: var(--heo-background) !important;
+}
+
+:root:not([data-theme="dark"]) .flink-item-name,
+:root:not([data-theme="dark"]) .flink-item-desc {
+  color: var(--heo-font-color) !important;
+}
+
 /* 文章卡片按钮 */
 /* 默认状态 */
 .recent-post-item {

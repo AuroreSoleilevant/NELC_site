@@ -1,6 +1,6 @@
 :root:not([data-theme="dark"]) {
   /* 全局页面背景底色 */
-  /*--heo-background: #6378d7;*/
+  --heo-background: #6378d7; /* 该颜色在此主题中不定义背景色，保留是为了一些引用这个色的内容 */
 
   /* 卡片 */
   --card-bg: rgba(230, 242, 255, 0.96); /* 背景色 */
@@ -160,6 +160,11 @@
 /* 分类悬停特别修复 */
 :root:not([data-theme="dark"]) .card-category-list-link:hover {
   color: #4c4948 !important;
+}
+
+/* 友情链接按钮 */
+:root:not([data-theme="dark"]) .flink-list-item::before {
+  background: #1f4fa3 !important;
 }
 
 /* 文章卡片按钮 */

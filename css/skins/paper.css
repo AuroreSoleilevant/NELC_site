@@ -123,6 +123,11 @@
   color: var(--heo-selection-font-color);
 }
 
+/* 友情链接按钮 */
+:root:not([data-theme="dark"]) .flink-list-item::before {
+  background: var(--heo-background) !important;
+}
+
 /* 文章卡片按钮 */
 /* 默认状态 */
 .recent-post-item {
