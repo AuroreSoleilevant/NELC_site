@@ -55,10 +55,6 @@
 :root:not([data-theme="dark"]) body {
   background: var(--heo-background);
   color: var(--heo-font-color);
-}
-
-/* 背景纹理 */
-:root:not([data-theme="dark"]) body {
   background-color: var(--heo-background);
   background-image: url("/NELC_site/image/skins/paper.png");
   background-repeat: repeat;

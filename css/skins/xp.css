@@ -1,43 +1,43 @@
 :root:not([data-theme="dark"]) {
   /* 全局页面背景底色 */
-  --heo-background: #460112;
+  /*--heo-background: #6378d7;*/
 
   /* 卡片 */
-  --card-bg: rgba(48, 42, 45, 0.92); /* 背景色 */
+  --card-bg: rgba(230, 242, 255, 0.96); /* 背景色 */
 
   /* 全局文本 */
-  --heo-font-color: #e8e6e3; /* 普通文本 */
-  --heo-link-hover-color: #e11637; /* 链接悬停文本 */
-  --heo-post-info-color: #b1a7aa; /* 文章信息抬头文本颜色 */
-  --heo-selection-color: #c21f39; /* 选定文本背景颜heo-font-color色 */
+  --heo-font-color: #1f2a33; /* 普通文本 */
+  --heo-link-hover-color: #4caf32; /* 链接悬停文本 */
+  --heo-post-info-color: #5f6f7c; /* 文章信息抬头文本颜色 */
+  --heo-selection-color: #4a8f2a; /* 选定文本背景颜heo-font-color色 */
   --heo-selection-font-color: #ffffff; /* 选定文本颜色 */
-  --heo-title-color: #e84d67; /* 文章大标题颜色，以及一些其他类似文本 */
-  --heo-sous-title-color: #e7ced2; /* 边栏次标题颜色 */
-  --heo-strong-color: #e11637; /* 加粗链接颜色 */
+  --heo-title-color: #1f4fa3; /* 文章大标题颜色，以及一些其他类似文本 */
+  --heo-sous-title-color: #5ea33a; /* 边栏次标题颜色 */
+  --heo-strong-color: #3f8f2d; /* 加粗链接颜色 */
 
   /* 顶栏 */
-  --heo-header-color: rgba(60, 26, 32, 0.75); /* 背景色 */
-  --heo-header-font-color: #f0ecec; /* 文本颜色 */
-  --heo-header-link-menu-hover-color: #c21f39; /* 菜单悬停条颜色 */
+  --heo-header-color: #2f63d6; /* 背景色 */
+  --heo-header-font-color: #ffffff; /* 文本颜色 */
+  --heo-header-link-menu-hover-color: #6bbf3a; /* 菜单悬停条颜色 */
 
   /* 底栏 */
-  --heo-footer-color: #3a1f24; /* 背景色 */
-  --heo-footer-font-color: #e6e0e0; /* 文本颜色 */
+  --heo-footer-color: #2f63d6; /* 背景色 */
+  --heo-footer-font-color: #ffffff; /* 文本颜色 */
 
   /* 侧栏 */
-  --heo-card-archive-bg: rgba(70, 36, 40, 0.75); /* 背景色 */
-  --heo-chapter-color: #8a1628; /* 目录当前章节颜色块 */
+  --heo-card-archive-bg: #e2f3d8; /* 背景色 */
+  --heo-chapter-color: #6bbf3a; /* 目录当前章节颜色块 */
 
   /* 滚动条 */
-  --scrollbar-thumb-bg: #8a1628; /* 滚动条滑块颜色 */
-  --scrollbar-frame: #3a2c30; /* 滚动条滑块边框颜色 */
+  --scrollbar-thumb-bg: #6bbf3a; /* 滚动条滑块颜色 */
+  --scrollbar-frame: #9ad46a; /* 滚动条滑块边框颜色 */
 
   /* 分割线 */
-  --heo--hr-color: #8a1628; /* 分割线颜色 */
-  --heo-he--before-color: #c21f39; /* 分割线前的文本颜色 */
+  --heo--hr-color: #b9d8a6; /* 分割线颜色 */
+  --heo-he--before-color: #3f8f2d; /* 分割线前的文本颜色 */
 
   /* 推荐框 */
-  --heo-pagination-related-bg: #6d0f1f; /* 推荐框背景色 */
+  --heo-pagination-related-bg: #9eca82; /* 推荐框背景色 */
 }
 
 /* 顶栏背景色 */
@@ -57,11 +57,9 @@
 
 /* 应用全局底色 */
 :root:not([data-theme="dark"]) body {
-  background: var(--heo-background);
+  /*background: var(--heo-background);*/
   color: var(--heo-font-color);
-  background-color: var(--heo-background);
-  background-image: url("/NELC_site/image/skins/vampire.png");
-  background-repeat: repeat;
+  background: linear-gradient(#7aa7ff, #6378d7) !important;
 }
 
 /* 底栏颜色 */
@@ -162,67 +160,27 @@
 /* 文章卡片按钮 */
 /* 默认状态 */
 .recent-post-item {
-  position: relative !important;
-  overflow: hidden !important;
-
   transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease !important;
-
-  transform: translateY(0) !important;
-
-  box-shadow: 0 0 0 rgba(0, 0, 0, 0) !important;
-
+    box-shadow 0.2s ease,
+    filter 0.2s ease,
+    border-color 0.2s ease !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
   border-radius: 8px !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
   cursor: pointer !important;
 }
 
-/* 血雾层 */
-.recent-post-item::after {
-  content: "" !important;
-  position: absolute !important;
-  inset: -20px !important;
-  pointer-events: none !important;
-
-  background: radial-gradient(
-    circle at center,
-    rgba(194, 31, 57, 0.45) 0%,
-    rgba(194, 31, 57, 0.25) 25%,
-    rgba(194, 31, 57, 0.15) 40%,
-    rgba(194, 31, 57, 0.05) 55%,
-    transparent 70%
-  ) !important;
-
-  opacity: 0 !important;
-  filter: blur(12px) !important;
-
-  transition:
-    opacity 0.3s ease,
-    transform 0.3s ease !important;
-}
-
-/* 悬停抬起 */
+/* 悬停效果 */
 .recent-post-item:hover {
-  transform: translateY(-10px) !important;
-
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25) !important;
-}
-
-/* 悬停血雾 */
-.recent-post-item:hover::after {
-  opacity: 1 !important;
-  transform: scale(2.5) !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18) !important;
+  border-color: #6bbf3a !important;
+  filter: brightness(1.03) !important;
 }
 
 /* 按下效果 */
 .recent-post-item:active {
-  transform: translateY(6px) !important;
-
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2) !important;
-}
-
-/* 按下血雾爆开 */
-.recent-post-item:active::after {
-  opacity: 1 !important;
-  transform: scale(4) !important;
+  box-shadow:
+    inset 0 3px 6px rgba(0, 0, 0, 0.25),
+    inset 0 1px 2px rgba(0, 0, 0, 0.18) !important;
+  filter: brightness(0.97) !important;
 }
