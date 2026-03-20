@@ -1,3 +1,93 @@
-.author-content-item .card-info-social {
-  display: none;
+/* 容器 */
+.card-info-social-icons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: visible;
+}
+
+/* 图标默认态 */
+.card-info-social-icons .social-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  width: 42px;
+  height: 42px;
+  border-radius: 21px;
+  background-color: transparent;
+  overflow: hidden;
+  margin: 0 5px;
+
+  transition:
+    width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    border-radius 0.35s ease,
+    background-color 0.35s ease,
+    opacity 0.25s ease,
+    margin 0.35s ease;
+}
+
+/* 图标 i：默认居中 */
+.card-info-social-icons .social-icon i {
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+  color: var(--heo-font-color);
+  transition: color 0.3s ease;
+}
+
+.card-info-social-icons .social-icon i:hover {
+  transform: rotate(360deg);
+  transition:
+    transform 0.3s ease,
+    color 0.3s ease;
+}
+
+/* ── 展开态 ── */
+.card-info-social-icons .social-icon.is-active {
+  width: 160px;
+  border-radius: 21px;
+  background-color: var(--heo-strong-color);
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0 16px;
+}
+
+.card-info-social-icons .social-icon.is-active i {
+  color: var(--heo-selection-font-color);
+}
+
+/* 文字伪元素：没了 */
+.card-info-social-icons .social-icon::after {
+  content: attr(title);
+  position: absolute;
+  /* 默认推到容器右侧外面，宽度 0 效果 */
+  right: -100%;
+  white-space: nowrap;
+  opacity: 0;
+  color: var(--heo-selection-font-color);
+  font-size: clamp(13px, 4cqi, 17px);
+  font-weight: 500;
+  pointer-events: none;
+  transition:
+    right 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.2s ease 0.15s;
+}
+
+/* 展开后：文字滑入 */
+.card-info-social-icons .social-icon.is-active::after {
+  right: 16px; /* 与左侧 padding 对称 */
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 1;
+}
+
+/* 其他图标收缩 */
+.card-info-social-icons.has-active .social-icon:not(.is-active) {
+  width: 0;
+  opacity: 0;
+  margin: 0;
+  pointer-events: none;
 }
